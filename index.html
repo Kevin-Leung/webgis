@@ -1,11 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="UTF-8"/>
+    <title>天地图示例 - 定位与快递查询</title>
+    <script type="text/javascript" src="http://api.tianditu.gov.cn/api?v=4.0&tk=2d1e402950c8b45d054cdee1f01df850"></script>
+    <script type="text/javascript">
+        var map;
+        var zoom = 12;
+
+        function onLoad() {
+            // 创建地图实例
+            map = new T.Map('mapDiv');
+            
+            // 设置地图中心为北京的经纬度，缩放级别为12
+            map.centerAndZoom(new T.LngLat(116.40769, 39.89945), zoom);
+            
+            // 添加天地图街道图层
+            var layer = new T.TileLayer();
+            layer.setUrl("http://t{s}.tianditu.com/vec/wmts?service=WMTS&request=GetTile&version=1.0.0&layer=vec&style=default&tilematrixset=w&format=tiles&tilematrix={z}&tilerow={y}&tilecol={x}&tk=您的密钥");
+            map.addLayer(layer);
+        }
+
+        // 定位功能
+        function locateUser() {
+            // 检查浏览器是否支持地理定位
+            if (navigator.geolocation) {
+                // 获取用户的地理位置
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude; // 获取纬度
+                    var lon = position.coords.longitude; // 获取经度
+
+                    // 创建LngLat对象并设置地图中心为用户的位置
+                    var userLocation = new T.LngLat(lon, lat);
+                    map.centerAndZoom(userLocation, zoom);
+
+                    // 可选：添加标记显示用户位置
+                    var marker = new T.Marker(userLocation);
+                    map.addOverlay(marker);
+
+                }, function() {
+                    alert("无法获取位置信息，定位失败！");
+                });
+            } else {
+                alert("浏览器不支持地理定位！");
+            }
+        }
+
+        // 快递查询功能
+        function queryExpress() {
+            var trackingNumber = document.getElementById("trackingNumber").value; // 获取用户输入的快递单号
+            var expcom = document.getElementById("expcom").value; // 获取用户输入的快递单号
+            if (trackingNumber) {
+                var expressUrl = "https://www.kuaidi100.com/chaxun?com="+expcom+"&nu=" + trackingNumber;
+                window.open(expressUrl, "_blank"); // 新开一个窗口显示查询结果
+            } else {
+                alert("请输入快递单号！");
+            }
+        }
+    </script>
 </head>
-<body>
+<body onload="onLoad()">
+    <h1>天地图 WebGIS 示例 - 定位与快递查询</h1>
     
+    <!-- 定位按钮 -->
+    <div>
+        <button onclick="locateUser()">定位到我的位置</button>
+    </div>
+    
+    <!-- 快递查询功能 -->
+    <div>
+        <h2>快递查询</h2>
+        <label for="trackingNumber">请输入快递单号：</label>
+        <input type="text" id="trackingNumber" placeholder="例如：1900171113992" />
+        <label for="trackingNumber">请输入快递公司拼音：</label>
+        <input type="text" id="expcom" placeholder="例如：jitu" />
+        <button onclick="queryExpress()">查询快递</button>
+    </div>
+
+    <div id="mapDiv" style="position:absolute;width:100%;height:500px;"></div>
 </body>
 </html>
