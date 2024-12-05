@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Adding map legend</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="css/leaflet.css">
+    <script src="js/leaflet.js"></script>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+        }
+        .popup {
+            text-align: center;
+        }        
+        .legend {
+            padding: 6px 8px;
+            background-color: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+        .legend div {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+        div.legend.leaflet-control br {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+
+let map = L.map("map").setView([32, 35], 10);
+
+L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attribution/">CartoDB</a>',
+    subdomains: "abcd",
+    maxZoom: 19
+}).addTo(map);
+
+function stat_color(d) {
+    if(d > 14965) return "#b30000";
+    if(d > 7754) return "#e34a33";
+    if(d > 2287) return "#fc8d59";
+    if(d > 865) return "#fdcc8a"; 
+    return "#fef0d9";
+}
+
+function stat_style(feature) {
+    return {
+        fillColor: stat_color(feature.properties.density),
+        weight: 0.5,
+        opacity: 1,
+        color: "black",
+        fillOpacity: 0.7
+    };
+}
+
+fetch("data/stat.geojson")
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        L.geoJSON(data, {
+            style: stat_style,
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(
+                    '<div class="popup">' + 
+                    feature.properties.YISHUV_STAT11 + "<br>" + 
+                    feature.properties.SHEM_YISHUV_ENGLISH + "<br>" + 
+                    Math.round(feature.properties.density) + ' km<sup>-2</sup>' +
+                    '</div>'
+                );
+            }
+        }).addTo(map);
+        
+    });
+
+// Create Leaflet control object for legend
+let legend = L.control({position: "topright"});
+
+// Function that runs when legend is added to map
+legend.onAdd = function() {
+
+    // Create <div> element and populate it with HTML
+    let div = L.DomUtil.create("div", "legend");        
+    div.innerHTML = 
+        '<b>Population in 2020</b><br>by statistical area<br>' +
+        '<small>Persons/km<sup>2</sup></small><br>' +
+        '<div style="background-color: #b30000"></div>14965+<br>' +
+        '<div style="background-color: #e34a33"></div>7754 - 14965<br>' +
+        '<div style="background-color: #fc8d59"></div>2287 - 7754<br>' +
+        '<div style="background-color: #fdcc8a"></div>865 - 2287<br>' +
+        '<div style="background-color: #fef0d9"></div>0 - 865<br>';
+
+    // Return the legend <div> containing the HTML content
+    return div;
+
+};
+
+// Add Legend to Map
+legend.addTo(map);
+
+    </script>
+</body>
+</html>
