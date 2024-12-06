@@ -1,8 +1,8 @@
 # WebGIS 学习网站
 
-欢迎访问我的 WebGIS 学习网站！这是一个为学习和实践 WebGIS 技术搭建和开发的教学示例项目。
-本项目网站：https://kevin-leung.github.io/webgis/
-注意：本项目资源完全来自网络，若要采用请与原作者联系！
+- 欢迎访问我的 WebGIS 学习网站！这是一个为学习和实践 WebGIS 技术搭建和开发的教学示例项目。
+- 本项目网站：https://kevin-leung.github.io/webgis/
+- 注意：本项目资源完全来自网络，若要采用请与原作者联系！
 
 ## 项目简介
 
