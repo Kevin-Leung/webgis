@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最短路径计算器</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            margin: 10px 0;
+        }
+        #map {
+            height: 70vh; /* 地图占窗口70%高度 */
+            width: 100%;
+        }
+        .controls, .info {
+            text-align: center;
+            margin: 10px;
+        }
+        button {
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #0079c1;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005f99;
+        }
+        .info {
+            font-size: 14px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>最短路径计算器</h1>
+    <div class="controls">
+        <button onclick="clearSelection()">清除选点</button>
+        <button onclick="calculateRoute()">计算路线</button>
+    </div>
+
+    <div class="info">
+        <div id="pointsInfo">请在地图上选择两个或更多点</div>
+        <div id="routeInfo">点击“计算路线”查看结果</div>
+    </div>
+
+    <div id="map"></div>
+
+    <script>
+        // 初始化地图
+        const map = L.map('map').setView([23.1291, 113.2644], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '©OpenStreetMap'
+        }).addTo(map);
+
+        // 保存用户选点
+        const waypoints = [];
+        let markers = [];
+        let routeLayer;
+
+        // 地图点击事件，记录点位
+        map.on('click', (e) => {
+            const latLng = e.latlng;
+            waypoints.push(latLng);
+            const marker = L.marker(latLng).addTo(map);
+            markers.push(marker);
+            updatePointsInfo();
+        });
+
+        // 更新选点信息显示
+        function updatePointsInfo() {
+            const pointsInfoDiv = document.getElementById('pointsInfo');
+            if (waypoints.length === 0) {
+                pointsInfoDiv.textContent = "暂无选点。";
+            } else {
+                pointsInfoDiv.innerHTML = waypoints.map((point, index) => 
+                    `点 ${index + 1}: 经度 ${point.lng.toFixed(6)}, 纬度 ${point.lat.toFixed(6)}`
+                ).join('<br>');
+            }
+        }
+
+        // 计算路线
+        function calculateRoute() {
+            if (waypoints.length < 2) {
+                alert("请至少选择两个点！");
+                return;
+            }
+
+            // 构造OSRM API URL
+            const coordinates = waypoints.map(point => `${point.lng},${point.lat}`).join(';');
+            const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.routes && data.routes.length > 0) {
+                        const route = data.routes[0];
+                        const coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
+                        const distance = (route.distance / 1000).toFixed(2); // 距离单位为千米
+
+                        // 清除旧路线
+                        if (routeLayer) {
+                            map.removeLayer(routeLayer);
+                        }
+
+                        // 添加新路线
+                        routeLayer = L.polyline(coordinates, { color: 'blue', weight: 5 }).addTo(map);
+
+                        // 调整视图以适应路线
+                        map.fitBounds(routeLayer.getBounds());
+
+                        // 显示路线长度
+                        const routeInfoDiv = document.getElementById('routeInfo');
+                        routeInfoDiv.textContent = `路线总长度: ${distance} 公里`;
+                    } else {
+                        alert("无法找到路线，请检查选点！");
+                    }
+                })
+                .catch(error => {
+                    console.error('错误:', error);
+                    alert("无法连接到路线服务，请稍后再试！");
+                });
+        }
+
+        // 清除选点
+        function clearSelection() {
+            waypoints.length = 0; // 清空数组
+            markers.forEach(marker => map.removeLayer(marker)); // 删除地图上的点
+            markers = [];
+            if (routeLayer) {
+                map.removeLayer(routeLayer); // 删除旧路线
+                routeLayer = null;
+            }
+            updatePointsInfo();
+            document.getElementById('routeInfo').textContent = "暂无路线。";
+        }
+    </script>
+</body>
+</html>
