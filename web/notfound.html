@@ -4,9 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>找不到网页 | 凯文小站</title>
-    <link rel="stylesheet" href="source/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
-    <link rel="stylesheet" href="source/templatemo-style.css">
+    <link rel="stylesheet" href="css/templatemo-style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        button {
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #0079c1;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005f99;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg">
@@ -21,42 +39,21 @@
         </div>
     </nav>
 
-    <h3>大家好我是Kevin</h3>
-    <ul>
-        <li>我的女孩叫Melissa❤️</li>
-        <li>Kevin最喜欢Melissa啦</li>
-        <li>Melissa是全世界最好的女孩</li>
-    </ul>
+    <div class="tm-hero d-flex justify-content-center align-items-center" data-parallax="scroll" data-image-src="img/hero.jpg">
+    </div>
 
-    <footer class="tm-bg-gray pt-5 pb-3 tm-text-gray tm-footer">
-        <div class="container-fluid tm-container-small">
-            <div class="row">
-                <div class="col-lg-6 col-md-12 col-12 px-5 mb-5">
-                    <p>This is free <a rel="sponsored" href="https://v5.getbootstrap.com/">Bootstrap 5</a> Alpha 2 HTML Template for video and photo websites. You can freely use this TemplateMo layout for a front-end integration with any kind of CMS website.</p>
-                </div>
-
-                <div class="col-lg-3 col-md-6 col-sm-6 col-12 px-5 mb-5 text-right">
-                    <ul class="tm-social-links d-flex justify-content-end pl-0 mb-5">
-                    <!--图标参考网站：https://www.runoob.com/font-awesome/fontawesome-tutorial.html -->
-                        <li class="mb-2"><a href="https://facebook.com"><i class="fa fa-facebook"></i></a></li>
-                        <li class="mb-2"><a href="https://zh.wikipedia.org"><i class="fa fa-wikipedia-w"></i></a></li>
-                        <li class="mb-2"><a href="https://weixin.qq.com/"><i class="fa fa-weixin"></i></a></li>
-                        <li class="mb-2"><a href="https://github.com/Kevin-Leung/webgis"><i class="fa fa-github"></i></a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-8 col-md-7 col-12 px-5 mb-3">
-                    Copyright 2020 Catalog-Z Company. All rights reserved.
-                </div>
-                <div class="col-lg-4 col-md-5 col-12 px-5 text-right">
-                    Designed by <class="tm-text-gray" rel="sponsored" target="_parent">Kevin</a>
-                </div>
-            </div>
+    <div class="container-fluid tm-container-content tm-mt-60">
+        <div class="row mb-4">
+            <h2 class="col-6 tm-text-primary">
+                哦不！我们丢失了这个网页
+            </h2>
+            <a class="navbar-brand" href="../index.html">
+                点击我返回主页
+            </a>
         </div>
-    </footer>
+    </div> <!-- container-fluid, tm-container-content -->
     
-    <script src="source/plugins.js"></script>
+    <script src="js/plugins.js"></script>
     <script>
         $(window).on("load", function() {
             $('body').addClass('loaded');
