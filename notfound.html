@@ -7,15 +7,26 @@
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
     <link rel="stylesheet" href="css/templatemo-style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        button {
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #0079c1;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #005f99;
+        }
+    </style>
 </head>
 <body>
-    <!-- Page Loader -->
-    <div id="loader-wrapper">
-        <div id="loader"></div>
-        <div class="loader-section section-left"></div>
-        <div class="loader-section section-right"></div>
-
-    </div>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
@@ -36,7 +47,9 @@
             <h2 class="col-6 tm-text-primary">
                 哦不！我们丢失了这个网页
             </h2>
-            <button onclick="window.location.href='./index.html'" type="button" id="add">返回主页</button>
+            <a class="navbar-brand" href="./index.html">
+                点击我返回主页
+            </a>
         </div>
     </div> <!-- container-fluid, tm-container-content -->
     
