@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>找不到网页 | 凯文小站</title>
-    <!-- 使用最新版本的 Bootstrap 和 FontAwesome -->
+    <title>文字分享 | 凯文小站</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #adc4dc;
+            background-color: #e0f7fa; 
             margin: 0;
             padding: 0;
         }
@@ -19,15 +18,15 @@
             font-weight: bold;
             color: #007bff !important;
         }
-        .tm-hero {
-            height: 50vh;
-            background-image: url('img/hero.jpg');
-            background-size: cover;
-            background-position: center;
-        }
         h2 {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        p h3 {
+            font-size: 1.2em;
             color: #333;
+            line-height: 1.6;
         }
         .btn-custom {
             background-color: #007bff;
@@ -37,52 +36,49 @@
             text-decoration: none;
             transition: background-color 0.3s ease;
         }
-        .btn-custom:hover {
-            background-color: #0056b3;
-            color: white;
-        }
         footer {
             background-color: #343a40;
             color: white;
+            text-align: center;
+            padding: 20px 0;
         }
         footer a {
             color: #6c757d;
             text-decoration: none;
         }
-        footer a:hover {
-            color: white;
+        footer p:first-child {
+            color: rgb(255, 255, 255);
         }
     </style>
 </head>
 <body>
-    <!-- 导航栏 -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
             <a class="navbar-brand" href="../index.html">
-                <i class="fas fa-bug"></i> 凯文小站
+                <i class="fas fa-bug"></i> 凯文小站 | 文字分享
             </a>
         </div>
     </nav>
 
-    <!-- Hero 部分 -->
-    <div class="tm-hero d-flex justify-content-center align-items-center">
-        <h2 class="text-black">文字示例</h2>
-    </div>
-
-    <!-- 主体内容 -->
     <div class="container text-center mt-5">
-        <a class="h2" href="#">
-            <p>我的女孩叫Melissa❤️</p>
-            <p>Kevin最喜欢Melissa啦</p>
-            <p>Melissa是全世界最好的女孩</p>
-        </a>
+        <div>
+            <h3>文字分享</h3>
+            <p> </p>
+            <p>春风轻拂林间路，</p>
+            <p>雨滴落下颖晨露。</p>
+            <p>心中常怀欣悦意，</p>
+            <p>前行勇敢全力赴。</p>
+            <p>山川广阔世间望，</p>
+            <p>时光悠悠界限图。</p>
+            <p>峰顶凝望最光明，</p>
+            <p>梦想启航好风驻。</p>
+        </div>
         <a href="../index.html" class="btn btn-custom mt-3">
             <i class="fas fa-arrow-left"></i> 点击我返回主页
         </a>
     </div>
 
-    <!-- 页脚 -->
-    <footer class="text-center py-4 mt-5">
+    <footer>
         <p>© 2024 凯文小站</p>
         <p>
             <a href="https://facebook.com"><i class="fab fa-facebook mx-2"></i></a>
@@ -92,7 +88,6 @@
         </p>
     </footer>
 
-    <!-- 引入最新版本的 Bootstrap 和 jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
