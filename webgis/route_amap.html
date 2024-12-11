@@ -72,7 +72,7 @@
         }
     </style>
     <!-- 高德地图API -->
-    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=d6b32d5033099d1e6a272a433d4ada03&plugin=AMap.Driving"></script>
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=d6b32d5033099d1e6a272a433d4ada03"></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -80,9 +80,13 @@
             <a class="navbar-brand" href="../index.html">
                 <i class="fas fa-bug"></i> 凯文小站 | 最短路径计算器
             </a>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="switchTo()">切换回OSM地图源</a>
+                </li>
+            </ul>
         </div>
     </nav>
-
     <div class="instruction-container">
         <div class="left-section">
             <div class="controls">
@@ -112,7 +116,7 @@
 
         const waypoints = [];
         let markers = [];
-        let driving;
+        let routeLayer;
 
         map.on('click', (e) => {
             const latLng = e.lnglat;
@@ -137,43 +141,91 @@
         }
 
         function calculateRoute() {
-            if (waypoints.length !== 2) {
-                alert("请选择起点和终点！");
+            if (waypoints.length < 2) {
+                alert("请至少选择两个点！");
                 return;
             }
 
-            if (!driving) {
-                driving = new AMap.Driving({
-                    map: map,
-                    panel: 'panel'
-                });
-            }
+            const coordinates = waypoints.map(point => `${point.getLng()},${point.getLat()}`).join(';');
+            const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=polyline&steps=true`;
 
-            driving.search(
-                new AMap.LngLat(waypoints[0].getLng(), waypoints[0].getLat()),
-                new AMap.LngLat(waypoints[1].getLng(), waypoints[1].getLat()),
-                (status, result) => {
-                    if (status === 'complete') {
-                        const distance = (result.routes[0].distance / 1000).toFixed(2);
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.routes && data.routes.length > 0) {
+                        const route = data.routes[0];
+                        const decodedPath = decodePolyline(route.geometry);
+                        console.log('Decoded Path:', decodedPath); // 调试输出
+
+                        const polyline = new AMap.Polyline({
+                            path: decodedPath,
+                            strokeColor: '#0079c1',
+                            strokeWeight: 5,
+                            lineJoin: 'round'
+                        });
+
+                        console.log('Polyline Object:', polyline); // 调试输出
+
+                        if (polyline && typeof polyline.addTo === 'function') {
+                            polyline.addTo(map);
+                        } else {
+                            console.error('polyline 对象无效或 addTo 方法不存在');
+                        }
+
+                        map.setFitView(polyline);
+
                         const routeInfoDiv = document.getElementById('routeInfo');
+                        const distance = (route.distance / 1000).toFixed(2); 
                         routeInfoDiv.textContent = `路线总长度: ${distance} 公里`;
 
-                        displayInstructions(result.routes[0].steps);
+                        displayInstructions(route.legs);
                     } else {
                         alert("无法找到路线，请检查选点！");
                     }
-                }
-            );
+                })
+                .catch(error => {
+                    console.error('错误:', error);
+                    alert("无法连接到路线服务，请稍后再试！");
+                });
         }
 
-        function displayInstructions(steps) {
+        function decodePolyline(encoded) {
+            let index = 0, len = encoded.length, lat = 0, lng = 0, array = [], point;
+            while (index < len) {
+                let b, shift = 0, result = 0;
+                do {
+                    b = encoded.charCodeAt(index++) - 63;
+                    result |= (b & 0x1f) << shift;
+                    shift += 5;
+                } while (b >= 0x20);
+                let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+                lat += dlat;
+
+                shift = 0;
+                result = 0;
+                do {
+                    b = encoded.charCodeAt(index++) - 63;
+                    result |= (b & 0x1f) << shift;
+                    shift += 5;
+                } while (b >= 0x20);
+                let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+                lng += dlng;
+
+                array.push([lng / 1e5, lat / 1e5]);
+            }
+            return array;
+        }
+
+        function displayInstructions(legs) {
             const instructionList = document.getElementById('instructionList');
             instructionList.innerHTML = '';
 
-            steps.forEach(step => {
-                const listItem = document.createElement('li');
-                listItem.textContent = step.instruction.replace(/<[^>]+>/g, '');
-                instructionList.appendChild(listItem);
+            legs.forEach(leg => {
+                leg.steps.forEach(step => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${step.maneuver.type} 在 ${step.name}, 在 ${step.distance} 米后转弯`;
+                    instructionList.appendChild(listItem);
+                });
             });
         }
 
@@ -181,17 +233,18 @@
             waypoints.length = 0;
             markers.forEach(marker => marker.setMap(null)); 
             markers = [];
-            if (driving) {
-                driving.clear();
+            if (routeLayer) {
+                map.remove(routeLayer); 
+                routeLayer = null;
             }
             updatePointsInfo();
             document.getElementById('routeInfo').textContent = "点击“计算路线”查看结果";
             document.getElementById('instructionList').innerHTML = ""; 
         } 
 
+        function switchToTianDiTu() {
+            window.location.href = 'route.html';
+        }
     </script>
 </body>
 </html>
-
-
-
