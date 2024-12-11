@@ -71,7 +71,8 @@
             text-align: left;
         }
     </style>
-    <script src="http://api.tianditu.gov.cn/api?v=4.0&tk=2d1e402950c8b45d054cdee1f01df850"></script>
+    <!-- 高德地图API -->
+    <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=d6b32d5033099d1e6a272a433d4ada03&plugin=AMap.Driving"></script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -87,7 +88,6 @@
             <div class="controls">
                 <button class="btn-custom" onclick="clearSelection()">清除选点</button>
                 <button class="btn-custom" onclick="calculateRoute()">计算路线</button>
-                <button class="btn-custom" onclick="addCenterPoint()">添加地图中心点</button>
             </div>
             <div class="info">
                 <div id="pointsInfo">请在地图上选择两个或更多点</div>
@@ -105,37 +105,26 @@
     <div id="map"></div>
 
     <script>
-        let map, markers = [], waypoints = [], routeLayer, centerMarker, centerPoint;
+        const map = new AMap.Map('map', {
+            zoom: 15,
+            center: [110.3434, 21.2714] // 注意：高德地图经纬度顺序是经度在前，纬度在后
+        });
 
-        // 初始化地图
-        function initMap() {
-            map = new T.Map("map");
-            map.centerAndZoom(new T.LngLat(110.3434, 21.2714), 15); // 中心坐标设置为中国某地
+        const waypoints = [];
+        let markers = [];
+        let driving;
 
-            // 添加天地图影像图层
-            var tdtImgAnnoLayer = new T.TileLayer.TiandituTileLayer({
-                layerType: "img_w",
-                tk: "2d1e402950c8b45d054cdee1f01df850"
+        map.on('click', (e) => {
+            const latLng = e.lnglat;
+            waypoints.push(latLng);
+            const marker = new AMap.Marker({
+                position: latLng,
+                map: map
             });
-            map.addLayer(tdtImgAnnoLayer);
+            markers.push(marker);
+            updatePointsInfo();
+        });
 
-            // 监听地图的点击事件来添加新点
-            map.addEventListener("click", function(e) {
-                const latLng = e.lnglat;
-                waypoints.push(latLng);
-                const marker = new T.Marker(latLng);
-                map.addOverLay(marker);
-                markers.push(marker);
-                updatePointsInfo();
-            });
-
-            // 在地图中心常驻一个点
-            centerPoint = map.getCenter();
-            centerMarker = new T.Marker(centerPoint);
-            map.addOverLay(centerMarker);
-        }
-
-        // 更新选中点信息
         function updatePointsInfo() {
             const pointsInfoDiv = document.getElementById('pointsInfo');
             if (waypoints.length === 0) {
@@ -147,91 +136,62 @@
             }
         }
 
-        // 计算路线
         function calculateRoute() {
-            if (waypoints.length < 2) {
-                alert("请至少选择两个点！");
+            if (waypoints.length !== 2) {
+                alert("请选择起点和终点！");
                 return;
             }
 
-            const coordinates = waypoints.map(point => `${point.getLng()},${point.getLat()}`).join(';');
-            const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson&steps=true`;
+            if (!driving) {
+                driving = new AMap.Driving({
+                    map: map,
+                    panel: 'panel'
+                });
+            }
 
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.routes && data.routes.length > 0) {
-                        const route = data.routes[0];
-                        const coordinates = route.geometry.coordinates.map(coord => [coord[1], coord[0]]);
-                        const distance = (route.distance / 1000).toFixed(2); 
-
-                        if (routeLayer) {
-                            map.removeOverLay(routeLayer);
-                        }
-
-                        routeLayer = new T.Polyline(coordinates.map(coord => new T.LngLat(coord[0], coord[1])), { color: 'blue', weight: 5 });
-                        map.addOverLay(routeLayer);
-
-                        map.setViewport(routeLayer.getBounds());
-
+            driving.search(
+                new AMap.LngLat(waypoints[0].getLng(), waypoints[0].getLat()),
+                new AMap.LngLat(waypoints[1].getLng(), waypoints[1].getLat()),
+                (status, result) => {
+                    if (status === 'complete') {
+                        const distance = (result.routes[0].distance / 1000).toFixed(2);
                         const routeInfoDiv = document.getElementById('routeInfo');
                         routeInfoDiv.textContent = `路线总长度: ${distance} 公里`;
 
-                        displayInstructions(route.legs);
+                        displayInstructions(result.routes[0].steps);
                     } else {
                         alert("无法找到路线，请检查选点！");
                     }
-                })
-                .catch(error => {
-                    console.error('错误:', error);
-                    alert("无法连接到路线服务，请稍后再试！");
-                });
+                }
+            );
         }
 
-        // 显示导航指令
-        function displayInstructions(legs) {
+        function displayInstructions(steps) {
             const instructionList = document.getElementById('instructionList');
             instructionList.innerHTML = '';
 
-            legs.forEach(leg => {
-                leg.steps.forEach(step => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `${step.maneuver.type} 在 ${step.name}, 在 ${step.distance} 米后转弯`;
-                    instructionList.appendChild(listItem);
-                });
+            steps.forEach(step => {
+                const listItem = document.createElement('li');
+                listItem.textContent = step.instruction.replace(/<[^>]+>/g, '');
+                instructionList.appendChild(listItem);
             });
         }
 
-        // 清除选点
         function clearSelection() {
             waypoints.length = 0;
-            markers.forEach(marker => map.removeOverLay(marker)); 
+            markers.forEach(marker => marker.setMap(null)); 
             markers = [];
-            if (routeLayer) {
-                map.removeOverLay(routeLayer); 
-                routeLayer = null;
+            if (driving) {
+                driving.clear();
             }
             updatePointsInfo();
             document.getElementById('routeInfo').textContent = "点击“计算路线”查看结果";
             document.getElementById('instructionList').innerHTML = ""; 
-        }
+        } 
 
-        // 添加地图中心点
-        function addCenterPoint() {
-            centerPoint = map.getCenter();  // 获取当前地图中心
-            if (centerMarker) {
-                map.removeOverLay(centerMarker);
-            }
-
-            centerMarker = new T.Marker(centerPoint);
-            map.addOverLay(centerMarker);
-
-            // 将地图中心点作为起点添加
-            waypoints.push(centerPoint);
-            updatePointsInfo();
-        }
-
-        window.onload = initMap;
     </script>
 </body>
 </html>
+
+
+
