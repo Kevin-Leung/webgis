@@ -166,10 +166,10 @@
 
                         console.log('Polyline Object:', polyline); // 调试输出
 
-                        if (polyline && typeof polyline.addTo === 'function') {
-                            polyline.addTo(map);
+                        if (polyline) {
+                            polyline.setMap(map);
                         } else {
-                            console.error('polyline 对象无效或 addTo 方法不存在');
+                            console.error('polyline 对象无效');
                         }
 
                         map.setFitView(polyline);
@@ -242,7 +242,7 @@
             document.getElementById('instructionList').innerHTML = ""; 
         } 
 
-        function switchToTianDiTu() {
+        function switchTo() {
             window.location.href = 'route.html';
         }
     </script>
